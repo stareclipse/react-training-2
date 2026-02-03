@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -14,6 +14,28 @@ function App() {
   const [products, setProducts] = useState([]);
   const [tempProduct, setTempProduct] = useState(null);
 
+  const checkAdmin = async () => {
+    try {
+      await axios.post(`${API_BASE}/api/user/check`);
+      await getProducts();
+      setIsAuth(true);
+    } catch (err) {
+      console.error(err);
+      setIsAuth(false);
+    }
+  };
+
+  useEffect(() => {
+    const token = document.cookie.replace(
+      /(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = token;
+      checkAdmin();
+    }
+  }, []);
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({
@@ -27,7 +49,7 @@ function App() {
     try {
       const res = await axios.post(`${API_BASE}/admin/signin`, formData);
       const { token, expired } = res.data;
-      document.cookie = `hexToken=${token}; expires=${new Date(expired)};`;
+      document.cookie = `hexToken=${token}; expires=${new Date(expired).toUTCString()}; path=/;`;
       axios.defaults.headers.common["Authorization"] = token;
       await getProducts();
       setIsAuth(true);
