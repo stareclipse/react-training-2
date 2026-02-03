@@ -58,6 +58,19 @@ function App() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${API_BASE}/logout`);
+    } catch (err) {
+      console.error(err);
+    }
+    document.cookie = "hexToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    delete axios.defaults.headers.common["Authorization"];
+    setIsAuth(false);
+    setProducts([]);
+    setTempProduct(null);
+  };
+
   const getProducts = async () => {
     try {
       const res = await axios.get(
@@ -73,9 +86,14 @@ function App() {
     <>
       {isAuth ? (
         <div className="container">
-          <div className="row mt-5">
+          <div className="d-flex justify-content-between align-items-center mt-4">
+            <h2>產品列表</h2>
+            <button className="btn btn-outline-danger" onClick={handleLogout}>
+              登出
+            </button>
+          </div>
+          <div className="row mt-3">
             <div className="col-md-6">
-              <h2>產品列表</h2>
               <table className="table">
                 <thead>
                   <tr>
