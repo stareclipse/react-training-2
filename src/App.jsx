@@ -14,18 +14,29 @@ function App() {
   const [products, setProducts] = useState([]);
   const [tempProduct, setTempProduct] = useState(null);
 
-  const checkAdmin = async () => {
+  const getProducts = async () => {
     try {
-      await axios.post(`${API_BASE}/api/user/check`);
-      await getProducts();
-      setIsAuth(true);
+      const res = await axios.get(
+        `${API_BASE}/api/${API_PATH}/admin/products/all`
+      );
+      setProducts(Object.values(res.data.products));
     } catch (err) {
       console.error(err);
-      setIsAuth(false);
     }
   };
 
   useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        await axios.post(`${API_BASE}/api/user/check`);
+        await getProducts();
+        setIsAuth(true);
+      } catch (err) {
+        console.error(err);
+        setIsAuth(false);
+      }
+    };
+
     const token = document.cookie.replace(
       /(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -69,17 +80,6 @@ function App() {
     setIsAuth(false);
     setProducts([]);
     setTempProduct(null);
-  };
-
-  const getProducts = async () => {
-    try {
-      const res = await axios.get(
-        `${API_BASE}/api/${API_PATH}/admin/products/all`
-      );
-      setProducts(Object.values(res.data.products));
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   return (
